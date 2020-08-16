@@ -1,0 +1,71 @@
+import numpy as np
+import cv2
+import os
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+#####################
+path = 'myData'
+testRatio = 0.2
+valRatio = 0.2
+######################
+
+count = 0
+images = []
+classNo = []
+myList = os.listdir(path)
+print("Total No of Classes Detected",myList)
+noOfClasses = len(myList)
+print("Importing Classes .......")
+
+for x in range (0,noOfClasses):
+    myPicList = os.listdir(path+"/"+str(x))
+    for y in myPicList:
+        curImg = cv2.imread(path+"/"+str(x)+"/"+y)
+        curImg = cv2.resize(curImg,(32,32))
+        images.append(curImg)
+        classNo.append(x)
+    print(x,end= " ")
+print(" ")
+
+images = np.array(images)
+classNo = np.array(classNo)
+
+print(images.shape)
+print(classNo.shape)
+#  print(images.shape)
+
+#### splitting the data
+X_train,X_test,y_train,y_test = train_test_split(images,classNo,test_size=testRatio)
+X_train,X_validation,y_train,y_validation = train_test_split(X_train,y_train,test_size=testRatio)
+print(X_train.shape)
+print(X_test.shape)
+print(X_validation.shape)
+
+numOfSamples = []
+for x in range(0,noOfClasses):
+     #print(len(np.where(y_train==x)[0]))
+     numOfSamples.append(len(np.where(y_train==x)[0]))
+print(numOfSamples)
+
+plt.figure(figsize=(10,5))
+plt.bar(range(0,noOfClasses),numOfSamples)
+plt.title("No of Images for each Class")
+plt.xlabel("Class ID")
+plt.ylabel("Number of Images")
+plt.show()
+
+def preProcessing(img):
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    img = cv2.equalizeHist(img)
+    img = img/255
+    return img
+
+#  img = preProcessing(X_train[27])
+#  img = cv2.resize(img,(300,300))
+#  cv2.imshow("PreProcessed",img)
+#  cv2.waitKey(0)
+X_train = np.array(list(map(preProcessing,X_train)))
+img = X_train[27]
+img = cv2.resize(img,(300,300))
+cv2.imshow("PreProcessed",img)
+cv2.waitKey(0)
